@@ -20,7 +20,7 @@
     :root {
       --bg: #f5f4f2;
       --card-bg: #ffffff;
-      --primary: #ff7a1a;         /* iPhone-style orange */
+      --primary: #ff7a1a;
       --primary-soft: #ffe3cc;
       --primary-deep: #f25a00;
       --text-main: #111;
@@ -118,18 +118,72 @@
       background: linear-gradient(135deg, var(--primary-soft), #ffffff);
       color: var(--primary-deep);
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+    
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.8); }
+    }
+    
+    .pill::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary-deep);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      background: #fafafa;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    
+    .stat-value.wins { color: #34C759; }
+    .stat-value.losses { color: #FF3B30; }
+    .stat-value.draws { color: #8E8E93; }
 
     .board {
-      width: min(100%, 320px);
+      width: 320px;
+      max-width: 100%;
       aspect-ratio: 1/1;
       border-radius: var(--radius-board);
       background: #fafafa;
       padding: 10px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
       gap: 8px;
       border: 1px solid var(--line);
+      margin: 0 auto;
     }
 
     .cell {
@@ -142,14 +196,71 @@
       font-size: 2.1rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all var(--transition-fast);
+      transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
       user-select: none;
+      position: relative;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    
+    .cell::before {
+      content: '';
+      display: block;
+      padding-bottom: 100%;
+    }
+    
+    .cell > * {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .cell:hover:not(.disabled) {
+      transform: scale(0.95);
+      background: #fafafa;
+      border-color: var(--primary);
+    }
+    
+    .cell:active:not(.disabled) {
+      transform: scale(0.90);
+    }
+    
+    @keyframes pop-in {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .cell.just-placed {
+      animation: pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .cell-x { color: var(--x-color); }
     .cell-o { color: var(--o-color); }
 
-    .mark-oldest { opacity: 0.35; }
+    .mark-oldest { 
+      opacity: 0.35;
+      position: relative;
+    }
+    
+    .mark-oldest::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-cell);
+      background: linear-gradient(45deg, transparent 48%, #ff000020 48%, #ff000020 52%, transparent 52%);
+    }
+    
+    @keyframes fade-warning {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.55; }
+    }
+    
+    .mark-oldest {
+      animation: fade-warning 1.5s ease-in-out infinite;
+    }
 
     .cell.disabled { pointer-events: none; opacity: 0.55; }
 
@@ -186,6 +297,15 @@
       cursor: pointer;
       font-weight: 600;
       box-shadow: 0 8px 20px rgba(242, 90, 0, 0.35);
+      transition: transform 0.2s ease;
+    }
+    
+    .overlay-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .overlay-btn:active {
+      transform: scale(0.95);
     }
   </style>
 </head>
@@ -201,6 +321,21 @@
         <div class="tagline">Three marks. Oldest fades. <span>Beat the AI.</span></div>
       </div>
       <div class="pill">Live AI</div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-label">Wins</div>
+        <div class="stat-value wins" id="wins">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Losses</div>
+        <div class="stat-value losses" id="losses">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Draws</div>
+        <div class="stat-value draws" id="draws">0</div>
+      </div>
     </div>
 
     <div id="board" class="board"></div>
@@ -222,7 +357,8 @@
       currentPlayer: PLAYER_X,
       humanPlayer: PLAYER_X,
       aiPlayer: PLAYER_O,
-      gameOver: false
+      gameOver: false,
+      stats: { wins: 0, losses: 0, draws: 0 }
     };
 
     const boardEl = document.getElementById("board");
@@ -230,6 +366,9 @@
     const overlayTitleEl = document.getElementById("overlay-title");
     const overlaySubEl = document.getElementById("overlay-sub");
     const overlayBtn = document.getElementById("overlay-btn");
+    const winsEl = document.getElementById("wins");
+    const lossesEl = document.getElementById("losses");
+    const drawsEl = document.getElementById("draws");
 
     let ortSession = null, modelReady = false;
 
@@ -282,14 +421,18 @@
       for (let i = 0; i < 9; i++) {
         const cell = boardEl.children[i];
         const val = state.board[i];
-        cell.textContent = "";
+        cell.innerHTML = "";
         cell.className = "cell";
         if (val === PLAYER_X) {
-          cell.textContent = "X";
+          const mark = document.createElement("span");
+          mark.textContent = "X";
+          cell.appendChild(mark);
           cell.classList.add("cell-x");
           if (state.positions[PLAYER_X][0] === i) cell.classList.add("mark-oldest");
         } else if (val === PLAYER_O) {
-          cell.textContent = "O";
+          const mark = document.createElement("span");
+          mark.textContent = "O";
+          cell.appendChild(mark);
           cell.classList.add("cell-o");
           if (state.positions[PLAYER_O][0] === i) cell.classList.add("mark-oldest");
         }
@@ -331,14 +474,41 @@
 
     function showOverlay(result) {
       overlayEl.classList.add("visible");
-      if (result==="win"){overlayTitleEl.textContent="YOU WON!";overlaySubEl.textContent="AI stumbled. Try again?";}
-      else if(result==="loss"){overlayTitleEl.textContent="AI WINS";overlaySubEl.textContent="It predicted you again.";}
-      else{overlayTitleEl.textContent="DRAW";overlaySubEl.textContent="Balanced... for now.";}
+      if (result==="win"){
+        overlayTitleEl.textContent="YOU WON!";
+        overlaySubEl.textContent="Nice move! Can you do it again?";
+        state.stats.wins++;
+        winsEl.textContent = state.stats.wins;
+        winsEl.parentElement.style.transform = "scale(1.2)";
+        setTimeout(() => winsEl.parentElement.style.transform = "scale(1)", 300);
+      }
+      else if(result==="loss"){
+        overlayTitleEl.textContent="AI WINS";
+        overlaySubEl.textContent="The AI is learning your moves...";
+        state.stats.losses++;
+        lossesEl.textContent = state.stats.losses;
+        lossesEl.parentElement.style.transform = "scale(1.2)";
+        setTimeout(() => lossesEl.parentElement.style.transform = "scale(1)", 300);
+      }
+      else{
+        overlayTitleEl.textContent="DRAW";
+        overlaySubEl.textContent="Evenly matched. Break the tie!";
+        state.stats.draws++;
+        drawsEl.textContent = state.stats.draws;
+        drawsEl.parentElement.style.transform = "scale(1.2)";
+        setTimeout(() => drawsEl.parentElement.style.transform = "scale(1)", 300);
+      }
     }
 
     function makeMove(index, player) {
       if (state.gameOver || state.board[index]!==EMPTY) return;
       applyTrailingRule(player,index);
+      
+      // Add pop-in animation
+      const cell = boardEl.children[index];
+      cell.classList.add("just-placed");
+      setTimeout(() => cell.classList.remove("just-placed"), 300);
+      
       const {done,winner}=isTerminal();
       if (done){state.gameOver=true;showOverlay(winner===state.humanPlayer?"win":winner===state.aiPlayer?"loss":"draw");}
       else state.currentPlayer=-state.currentPlayer;

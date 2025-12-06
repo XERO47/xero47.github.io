@@ -86,6 +86,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
     }
 
     .brand {
@@ -147,6 +148,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
     
     @keyframes pulse-dot {
@@ -161,6 +163,52 @@
       border-radius: 50%;
       background: var(--primary-deep);
       animation: pulse-dot 2s ease-in-out infinite;
+    }
+    
+    .pill.inactive::before {
+      animation: none;
+      background: var(--text-muted);
+    }
+    
+    .pill.inactive {
+      background: linear-gradient(135deg, #f0f0f0, #ffffff);
+      color: var(--text-muted);
+    }
+    
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fafafa;
+      border-radius: 999px;
+      padding: 4px;
+      border: 1px solid var(--line);
+    }
+    
+    .mode-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    
+    .mode-btn.active {
+      background: var(--primary-deep);
+      color: white;
+      box-shadow: 0 2px 8px rgba(242, 90, 0, 0.3);
+    }
+    
+    @media (min-width: 400px) {
+      .mode-btn {
+        font-size: 0.72rem;
+        padding: 5px 12px;
+      }
     }
     
     .stats-bar {
@@ -271,9 +319,6 @@
       .board-hint {
         font-size: 3rem;
         letter-spacing: 6px;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
       }
     }
     
@@ -480,7 +525,13 @@
         </div>
         <div class="tagline">Three marks. Oldest fades. <span>Beat the AI.</span></div>
       </div>
-      <div class="pill">Live AI</div>
+      <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+        <div class="pill" id="ai-indicator">Live AI</div>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="mode-ai">vs AI</button>
+          <button class="mode-btn" id="mode-human">vs Human</button>
+        </div>
+      </div>
     </div>
 
     <div class="stats-bar">
@@ -499,7 +550,7 @@
     </div>
 
     <div id="board" class="board">
-      <div id="board-hint" class="board-hint">CLICK ANY BOX</div>
+      <div id="board-hint" class="board-hint">CLICK</div>
     </div>
 
     <div id="overlay" class="overlay">
@@ -520,7 +571,8 @@
       humanPlayer: PLAYER_X,
       aiPlayer: PLAYER_O,
       gameOver: false,
-      stats: { wins: 0, losses: 0, draws: 0 }
+      stats: { wins: 0, losses: 0, draws: 0 },
+      mode: 'ai' // 'ai' or 'human'
     };
 
     const boardEl = document.getElementById("board");
@@ -532,6 +584,9 @@
     const winsEl = document.getElementById("wins");
     const lossesEl = document.getElementById("losses");
     const drawsEl = document.getElementById("draws");
+    const aiIndicatorEl = document.getElementById("ai-indicator");
+    const modeAiBtn = document.getElementById("mode-ai");
+    const modeHumanBtn = document.getElementById("mode-human");
 
     let ortSession = null, modelReady = false;
 
@@ -557,8 +612,8 @@
       overlayEl.classList.remove("visible");
       renderBoard();
 
-      // --- Special opening rule: if AI is X, never open at index 3 (left-middle)
-      if (state.aiPlayer === PLAYER_X) {
+      // --- Special opening rule: if AI is X and mode is AI, never open at index 3 (left-middle)
+      if (state.mode === 'ai' && state.aiPlayer === PLAYER_X) {
         setTimeout(() => {
           const banned = 3;
           const moves = availableActions().filter(m => m !== banned);
@@ -569,6 +624,23 @@
         }, 400);
       }
     }
+    
+    function setMode(mode) {
+      state.mode = mode;
+      if (mode === 'ai') {
+        modeAiBtn.classList.add('active');
+        modeHumanBtn.classList.remove('active');
+        aiIndicatorEl.classList.remove('inactive');
+      } else {
+        modeHumanBtn.classList.add('active');
+        modeAiBtn.classList.remove('active');
+        aiIndicatorEl.classList.add('inactive');
+      }
+      resetGame();
+    }
+    
+    modeAiBtn.addEventListener('click', () => setMode('ai'));
+    modeHumanBtn.addEventListener('click', () => setMode('human'));
 
     function renderBoard() {
       if (boardEl.children.length === 1) {
@@ -584,7 +656,7 @@
       const isFirstMove = state.positions[PLAYER_X].length === 0 && state.positions[PLAYER_O].length === 0;
       
       // Show/hide board hint
-      if (isFirstMove && state.currentPlayer === state.humanPlayer) {
+      if (isFirstMove) {
         boardHintEl.style.display = 'block';
       } else {
         boardHintEl.style.display = 'none';
@@ -614,9 +686,18 @@
     }
 
     function onCellClick(e) {
-      if (state.gameOver || state.currentPlayer !== state.humanPlayer) return;
-      makeMove(Number(e.currentTarget.dataset.index), state.humanPlayer);
-      if (!state.gameOver) setTimeout(aiMove, 250);
+      if (state.gameOver) return;
+      
+      // In AI mode, only allow clicks when it's human's turn
+      if (state.mode === 'ai' && state.currentPlayer !== state.humanPlayer) return;
+      
+      // In human mode, allow any player to click
+      makeMove(Number(e.currentTarget.dataset.index), state.currentPlayer);
+      
+      // Only trigger AI move in AI mode
+      if (state.mode === 'ai' && !state.gameOver) {
+        setTimeout(aiMove, 250);
+      }
     }
 
     function applyTrailingRule(player, index) {
@@ -647,29 +728,47 @@
 
     function showOverlay(result) {
       overlayEl.classList.add("visible");
-      if (result==="win"){
-        overlayTitleEl.textContent="YOU WON!";
-        overlaySubEl.textContent="Nice move! Can you do it again?";
-        state.stats.wins++;
-        winsEl.textContent = state.stats.wins;
-        winsEl.parentElement.style.transform = "scale(1.2)";
-        setTimeout(() => winsEl.parentElement.style.transform = "scale(1)", 300);
-      }
-      else if(result==="loss"){
-        overlayTitleEl.textContent="AI WINS";
-        overlaySubEl.textContent="The AI is learning your moves...";
-        state.stats.losses++;
-        lossesEl.textContent = state.stats.losses;
-        lossesEl.parentElement.style.transform = "scale(1.2)";
-        setTimeout(() => lossesEl.parentElement.style.transform = "scale(1)", 300);
-      }
-      else{
-        overlayTitleEl.textContent="DRAW";
-        overlaySubEl.textContent="Evenly matched. Break the tie!";
-        state.stats.draws++;
-        drawsEl.textContent = state.stats.draws;
-        drawsEl.parentElement.style.transform = "scale(1.2)";
-        setTimeout(() => drawsEl.parentElement.style.transform = "scale(1)", 300);
+      
+      if (state.mode === 'human') {
+        // Human vs Human mode
+        if (result==="win"){
+          overlayTitleEl.textContent = state.currentPlayer === PLAYER_X ? "O WINS!" : "X WINS!";
+          overlaySubEl.textContent="Great game! Play again?";
+        }
+        else if(result==="loss"){
+          overlayTitleEl.textContent = state.currentPlayer === PLAYER_X ? "X WINS!" : "O WINS!";
+          overlaySubEl.textContent="Great game! Play again?";
+        }
+        else{
+          overlayTitleEl.textContent="DRAW";
+          overlaySubEl.textContent="Evenly matched. Break the tie!";
+        }
+      } else {
+        // AI mode
+        if (result==="win"){
+          overlayTitleEl.textContent="YOU WON!";
+          overlaySubEl.textContent="Nice move! Can you do it again?";
+          state.stats.wins++;
+          winsEl.textContent = state.stats.wins;
+          winsEl.parentElement.style.transform = "scale(1.2)";
+          setTimeout(() => winsEl.parentElement.style.transform = "scale(1)", 300);
+        }
+        else if(result==="loss"){
+          overlayTitleEl.textContent="AI WINS";
+          overlaySubEl.textContent="The AI is learning your moves...";
+          state.stats.losses++;
+          lossesEl.textContent = state.stats.losses;
+          lossesEl.parentElement.style.transform = "scale(1.2)";
+          setTimeout(() => lossesEl.parentElement.style.transform = "scale(1)", 300);
+        }
+        else{
+          overlayTitleEl.textContent="DRAW";
+          overlaySubEl.textContent="Evenly matched. Break the tie!";
+          state.stats.draws++;
+          drawsEl.textContent = state.stats.draws;
+          drawsEl.parentElement.style.transform = "scale(1.2)";
+          setTimeout(() => drawsEl.parentElement.style.transform = "scale(1)", 300);
+        }
       }
     }
 

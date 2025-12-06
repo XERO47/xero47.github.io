@@ -12,7 +12,7 @@
 </script>
   <meta charset="UTF-8" />
   <title>Beat the Trailing AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <!-- onnxruntime-web CDN -->
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js" defer></script>
 
@@ -36,20 +36,26 @@
       --font-main: system-ui, -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
     }
 
-    * { box-sizing: border-box; }
+    * { 
+      box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+    }
 
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
+      width: 100%;
+      max-width: 100%;
       background: var(--bg);
       font-family: var(--font-main);
       color: var(--text-main);
       -webkit-font-smoothing: antialiased;
       overflow: hidden;
       position: fixed;
-      width: 100%;
       touch-action: pan-y;
+      -webkit-text-size-adjust: 100%;
     }
 
     body {
@@ -58,7 +64,10 @@
       justify-content: center;
       padding: 12px;
       min-height: 100vh;
+      min-height: -webkit-fill-available;
       overscroll-behavior: none;
+      width: 100vw;
+      max-width: 100%;
     }
 
     .app {

@@ -322,6 +322,7 @@
       z-index: 10;
       text-shadow: 0 2px 20px rgba(255, 122, 26, 0.3);
       animation: hint-fade 2s ease-in-out infinite;
+      text-align: center;
     }
     
     @media (min-width: 400px) {
@@ -559,7 +560,7 @@
     </div>
 
     <div id="board" class="board">
-      <div id="board-hint" class="board-hint">CLICK</div>
+      <div id="board-hint" class="board-hint">CLICK ANY BOX</div>
     </div>
 
     <div id="overlay" class="overlay">
@@ -786,7 +787,7 @@
       applyTrailingRule(player,index);
       
       // Add pop-in animation
-      const cell = boardEl.children[index];
+      const cell = boardEl.children[index]; // keep your original indexing
       cell.classList.add("just-placed");
       setTimeout(() => cell.classList.remove("just-placed"), 300);
       
@@ -796,9 +797,72 @@
       renderBoard();
     }
 
+    // ------------ Trailing-aware 1-move win / threat detection ------------
+
+    function simulateMove(board, positions, player, index) {
+      // pure simulation respecting trailing rule
+      const newBoard = board.slice();
+      const newPositions = {
+        [PLAYER_X]: positions[PLAYER_X].slice(),
+        [PLAYER_O]: positions[PLAYER_O].slice()
+      };
+      newBoard[index] = player;
+      newPositions[player].push(index);
+      if (newPositions[player].length > MAX_MARKS) {
+        const old = newPositions[player].shift();
+        if (newBoard[old] === player) {
+          newBoard[old] = EMPTY;
+        }
+      }
+      return { board: newBoard, positions: newPositions };
+    }
+
+    function findImmediateWinTrailing(player) {
+      const legal = availableActions();
+      for (const idx of legal) {
+        const sim = simulateMove(state.board, state.positions, player, idx);
+        const winner = checkWinner(sim.board);
+        if (winner === player) {
+          return idx;
+        }
+      }
+      return null;
+    }
+
+    function findImmediateThreatTrailing(player) {
+      const opp = -player;
+      const legalForOpp = availableActions(); // same empties they could play
+      for (const idx of legalForOpp) {
+        const sim = simulateMove(state.board, state.positions, opp, idx);
+        const winner = checkWinner(sim.board);
+        if (winner === opp) {
+          // If opponent could win by playing idx now, we should block there
+          return idx;
+        }
+      }
+      return null;
+    }
+
+    // --------------------------- AI move ---------------------------
+
     async function aiMove() {
       if (state.gameOver || state.currentPlayer!==state.aiPlayer) return;
-      const move = modelReady ? await nnMove() : heuristicMove();
+
+      const cur = state.aiPlayer;
+
+      // 1. If AI can win in one move (with trailing), do it.
+      let move = findImmediateWinTrailing(cur);
+
+      // 2. Else, if opponent can win in one move (with trailing), block it.
+      if (move === null || move === undefined) {
+        move = findImmediateThreatTrailing(cur);
+      }
+
+      // 3. Else, let the model decide as usual.
+      if (move === null || move === undefined) {
+        move = modelReady ? await nnMove() : heuristicMove();
+      }
+
       if (move!=null) makeMove(move,state.aiPlayer);
     }
 
@@ -825,7 +889,6 @@
         const t=new ort.Tensor("float32",input,[1,36]);
         const out=await ortSession.run({input:t},["logits"]);
         const logits=Array.from(out.logits.data);
-        moves.forEach(m=>{});
         let best=moves[0],bestVal=logits[best];
         for(const m of moves) if(logits[m]>bestVal){best=m;bestVal=logits[m];}
         return best;

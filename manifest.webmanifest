@@ -1,0 +1,9 @@
+{
+  "name": "PULSE",
+  "short_name": "PULSE",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#06070c",
+  "theme_color": "#06070c"
+}

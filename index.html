@@ -1,6 +1,15 @@
 <!doctype html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4D4LFYKYWC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-4D4LFYKYWC');
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -41,15 +50,6 @@
   .hide{display:none!important}
 </style>
 </head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-4D4LFYKYWC"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-4D4LFYKYWC');
-</script>
 <body>
 <canvas id="c"></canvas>
 <div class="hud hide" id="hud">
@@ -70,12 +70,13 @@
    ██  TUNING  ██  — everything that decides how the game feels lives here.
    Nothing below this block hardcodes a difficulty number.
    ============================================================================ */
+const TUNE_VERSION = 2;  // bump whenever TUNE changes, so analytics can compare versions
 const TUNE = {
 
   /* ---- pace: how much time the player gets ---- */
-  windowMul:      2.2,   // window = their reaction time × this. Higher = slower, easier
+  startWindowMs:  1300,  // time a ring takes to reach the target at hit 0, ms
   minWindowMs:    420,   // absolute floor on the window, ms
-  rampPerHit:     0.008, // fraction the window shortens per hit
+  rampPerHit:     0.012, // fraction the window shortens per hit
   speedMin:       0.12,  // px/s floor, as a fraction of screen
   speedMax:       1.20,  // px/s ceiling, as a fraction of screen
   startSpeedSlow: 0.18,  // opening speed, first runs
@@ -83,8 +84,8 @@ const TUNE = {
 
   /* ---- tolerance: how forgiving the hit band is ---- */
   tolBase:        0.090, // starting band, as a fraction of screen
-  decayPerHit:    0.972, // band shrink per hit. Higher = easier
-  tolFloor:       0.034, // absolute band floor
+  decayPerHit:    0.982, // band shrink per hit. Higher = easier
+  tolFloor:       0.040, // absolute band floor
   deathBand:      2.20,  // how far past the target ends the run, in band-widths
   perfectFrac:    0.30,  // fraction of the band that counts as PERFECT
 
@@ -92,10 +93,10 @@ const TUNE = {
   tolMulStart:    1.00,
   tolMulMin:      0.70,  // floor for the learned multiplier
   tolMulMax:      2.40,  // ceiling
-  successLow:     0.62,  // hit-rate below this widens the band
-  successHigh:    0.85,  // hit-rate above this tightens it
-  widen:          1.08,  // widen factor on a miss
-  tighten:        0.98,  // tighten factor on a hit
+  runHitsLow:     10,    // runs shorter than this widen the band
+  runHitsHigh:    22,    // runs longer than this tighten it
+  widen:          1.08,  // widen factor per short run
+  tighten:        0.96,  // tighten factor per long run
   emaRate:        0.18,  // how fast the hit-rate estimate tracks reality
   errWindow:      40,    // error samples kept
   rtWindow:       20,    // reaction-time samples kept
@@ -103,27 +104,27 @@ const TUNE = {
   biasClampFrac:  0.40,  // max bias shift, in band-widths
 
   /* ---- onboarding ---- */
-  onboardingRuns: 3,     // runs that get the boost
+  onboardingRuns: 2,     // runs that get the boost
   onboardingHits: 15,    // total hits that get the boost
   onboardingMul:  1.50,  // band multiplier during onboarding
 
   /* ---- mercy after a near-miss ---- */
   mercyTaps:      5,
   mercyMul:       1.50,
-  closeBand:      2.40,  // what counts as "SO CLOSE", in band-widths
+  closeBand:      1.40,  // what counts as "SO CLOSE", in band-widths. Keep below deathBand
 
   /* ---- content gates ---- */
-  unlockDriftHits: 25,   // hits needed to unlock DRIFT
+  unlockDriftHits: 15,   // hits needed to unlock DRIFT
   unlockDriftRate: 0.62, // hit-rate needed to unlock DRIFT
-  unlockBonusHits: 60,
+  unlockBonusHits: 40,
   unlockBonusRate: 0.68,
   boredMs:         4200, // retry latency that means they're bored
-  goldChance:      0.18,
+  goldChance:      0.12,
   driftAmp:        0.022, // drift amplitude, fraction of screen
   driftSpeed:      1.50,  // drift phase speed
 
   /* ---- feel ---- */
-  restartDelayMs:  140,
+  restartDelayMs:  350,
   shakeDecay:      0.90,
   flashDecay:      0.92
 
@@ -136,7 +137,7 @@ const elStart = document.getElementById('start'), elHud = document.getElementByI
 const elTag = document.getElementById('tag'), elGo = document.getElementById('go');
 const elDbg = document.getElementById('dbg');
 const DEBUG = new URLSearchParams(location.search).has('debug');
-const PROFILE_VERSION = 3;
+const PROFILE_VERSION = 4;
 
 let W = 0, H = 0, DPR = 1, MIN = 0, TARGET = 0, MAXR = 0, CX = 0, CY = 0;
 let state = 'idle', ringR = 0, speed = 0, score = 0, hits = 0;
@@ -195,11 +196,6 @@ function learn(signedErr, rt, wasHit){
   prof.rt.push(rt); if(prof.rt.length > TUNE.rtWindow) prof.rt.shift();
 
   prof.successEma += ((wasHit ? 1 : 0) - prof.successEma) * TUNE.emaRate;
-
-  if(prof.successEma < TUNE.successLow)
-    prof.tolMul = Math.min(TUNE.tolMulMax, prof.tolMul * TUNE.widen);
-  else if(prof.successEma > TUNE.successHigh)
-    prof.tolMul = Math.max(TUNE.tolMulMin, prof.tolMul * TUNE.tighten);
 
   if(prof.err.length >= 4){
     const cap = tolerance() * TUNE.biasClampFrac;
@@ -353,8 +349,7 @@ function hit(perfect){
   const semi = SCALE[hits % SCALE.length] + Math.floor(hits / SCALE.length) * 12;
   beep(220 * Math.pow(2, semi / 12), 0.07, 'triangle', 0.055);
 
-  const windowMs = Math.max(medRT() * TUNE.windowMul, TUNE.minWindowMs)
-    / (1 + hits * TUNE.rampPerHit);
+  const windowMs = Math.max(TUNE.minWindowMs, TUNE.startWindowMs / (1 + hits * TUNE.rampPerHit));
   speed = Math.min(MIN * TUNE.speedMax, Math.max(MIN * TUNE.speedMin,
     (MAXR - aimR()) / (windowMs / 1000)));
 
@@ -369,6 +364,12 @@ function die(signedErr){
   newBest = score > 0 && score >= best;
   prof.deaths++;
 
+  // every run ends in exactly one miss, so judge difficulty by run length, not per-tap rate
+  if(hits < TUNE.runHitsLow)
+    prof.tolMul = Math.min(TUNE.tolMulMax, prof.tolMul * TUNE.widen);
+  else if(hits > TUNE.runHitsHigh)
+    prof.tolMul = Math.max(TUNE.tolMulMin, prof.tolMul * TUNE.tighten);
+
   if(score > best){
     best = score; localStorage.setItem('pulse.best', best);
     ghost = runHits.slice(0, 60);
@@ -382,6 +383,11 @@ function die(signedErr){
   }
   burst(26, '#ff5c78'); buzz([45]); beep(120, 0.3, 'sawtooth', 0.08);
   saveProf();
+
+  if(typeof gtag === 'function') gtag('event', 'run_end', {
+    hits, score, run: prof.runs, close: closeDeath, new_best: newBest,
+    tol_mul: +prof.tolMul.toFixed(2), tune_v: TUNE_VERSION
+  });
 }
 
 function tap(){

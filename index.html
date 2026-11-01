@@ -124,6 +124,7 @@
   </div>
   <button class="btn" id="go" type="button">PLAY</button>
   <button class="chip" id="toSel" type="button">ALL STAGES</button>
+  <button class="chip hide" id="endlessTop" type="button">ENDLESS</button>
 </div>
 
 <div id="sel" class="screen hide">
@@ -132,7 +133,7 @@
     <button class="chip" id="selClose" type="button">CLOSE</button>
   </div>
   <div id="selBody"></div>
-  <button class="chip" id="endlessBtn" type="button" style="margin-top:6px">ENDLESS</button>
+  <button class="chip hide" id="endlessBtn" type="button" style="margin-top:6px">ENDLESS</button>
 </div>
 
 <div id="end" class="screen hide">
@@ -240,6 +241,7 @@ let cleared = +(localStorage.getItem('p.cleared') || 0);
 let starMap = JSON.parse(localStorage.getItem('p.stars') || '{}');
 let lastPlayed = +(localStorage.getItem('p.last') || 0);
 let installEvt = null, installAsked = +(localStorage.getItem('p.instask') || 0);
+let toastT = 0;
 elBest.textContent = best;
 
 /* ---------- player model ---------- */
@@ -274,7 +276,8 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const world = () => Math.min(WORLDS - 1, Math.floor(stage / PER_WORLD));
 const isBoss = () => mode === 'stage' && stage % PER_WORLD === PER_WORLD - 1;
 const hasMod = m => mode === 'endless' || MODS[world()].includes(m);
-const isGoldStage = () => mode === 'endless' || MODS[world()] === 'gold' || MODS[world()] === 'drift+offset';
+const isGoldStage = () => mode === 'endless' || MODS[world()] === 'gold'
+  || MODS[world()] === 'drift+offset';
 const quotaFor = i => (i % PER_WORLD === PER_WORLD - 1) ? 10
   : Math.min(3 + Math.floor((i % PER_WORLD) / 2), 8);
 
@@ -283,9 +286,9 @@ const onboarding = () => (mode === 'stage' && stage < TUNE.onboardingStages)
 const mercyOn = () => mode === 'stage' && world() <= 2;
 
 function effTolMul(){
-  const base = mode === 'endless' ? prof.tolMul : LEVEL.tolMul[world()];
-  return mode === 'endless' ? prof.tolMul
-    : clamp(prof.tolMul, base * TUNE.clampLo, base * TUNE.clampHi);
+  if(mode === 'endless') return prof.tolMul;
+  const base = LEVEL.tolMul[world()];
+  return clamp(prof.tolMul, base * TUNE.clampLo, base * TUNE.clampHi);
 }
 function bandMul(){ return (goldNext && isGoldStage()) ? TUNE.goldBandMul : 1; }
 
@@ -407,39 +410,52 @@ function announce(t){
   pops.push({ x: CX, y: CY - TARGET - 46, t: 'NEW: ' + t, s: 18, c: '#7dffc4', life: 2 });
   beep(1046, 0.16, 'triangle', 0.07); buzz([10, 50, 10]);
 }
+function showToast(msg){
+  elMid.textContent = msg;
+  elMid.classList.remove('hide');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => {
+    if(state === 'idle') elMid.classList.add('hide');
+  }, 1400);
+}
 
 /* ---------- flow ---------- */
 function startStage(i, m){
   mode = m || 'stage';
+  if(mode === 'stage') i = Math.min(i, cleared);
   stage = i;
-  quota = mode === 'endless' ? Infinity : quotaFor(i);
+  quota = mode === 'endless' ? Infinity : mode === 'daily' ? 12 : quotaFor(i);
   perfects = 0; nonPerfect = 0; hits = 0; score = 0; hitsLeft = quota;
   parts = []; pops = []; shake = 0; flash = 0; hue = 188;
   runT = 0; runHits = []; closeDeath = false; goldNext = false;
   driftPhase = 0; offR = 0; newBest = false;
   elScore.textContent = '0';
   elEnd.classList.add('hide'); elSel.classList.add('hide'); elStart.classList.add('hide');
+  el('inst').classList.add('hide');
   elHud.classList.remove('hide'); elMid.classList.remove('hide');
   elTag.classList.add('hide');
   if(DEBUG) elDbg.style.display = 'block';
 
   elMid.textContent = mode === 'endless'
-    ? 'ENDLESS' : 'W' + (world() + 1) + ' · STAGE ' + ((stage % PER_WORLD) + 1)
-      + (isBoss() ? ' · BOSS' : '') + ' · ' + WNAME[world()];
+    ? 'ENDLESS'
+    : mode === 'daily'
+      ? 'DAILY · 12 HITS'
+      : 'W' + (world() + 1) + ' · STAGE ' + ((stage % PER_WORLD) + 1)
+        + (isBoss() ? ' · BOSS' : '') + ' · ' + WNAME[world()];
 
-  const wm = mode === 'endless' ? LEVEL.windowMs[5] : LEVEL.windowMs[world()];
   speed = MIN * (stage < TUNE.onboardingStages ? TUNE.startSpeedSlow : TUNE.startSpeedNorm);
   ringR = MAXR;
   state = 'play';
   prof.lastResetAt = performance.now();
 
-  track(mode === 'endless' ? 'endless_start' : 'stage_start',
+  track(mode === 'endless' ? 'endless_start'
+    : mode === 'daily' ? 'daily_start' : 'stage_start',
     { stage, world: world(), boss: isBoss() });
 }
 
 function nextStage(){
   if(mode === 'endless'){ startStage(stage, 'endless'); return; }
-  if(stage + 1 >= TOTAL){ showSel(); return; }
+  if(mode === 'daily' || stage + 1 >= TOTAL){ showStart(); return; }
   startStage(stage + 1, 'stage');
 }
 
@@ -452,7 +468,7 @@ function prevStage(){
 function showSel(){
   state = 'select';
   elHud.classList.add('hide'); elMid.classList.add('hide'); elTag.classList.add('hide');
-  elEnd.classList.add('hide'); elStart.classList.add('hide');
+  elEnd.classList.add('hide'); elStart.classList.add('hide'); el('inst').classList.add('hide');
   elSel.classList.remove('hide');
   renderSel();
 }
@@ -460,6 +476,7 @@ function showSel(){
 function renderSel(){
   const body = el('selBody');
   body.innerHTML = '';
+  const cur = Math.min(cleared, TOTAL - 1);
   for(let w = 0; w < WORLDS; w++){
     const blk = document.createElement('div');
     blk.className = 'wblk';
@@ -474,7 +491,7 @@ function renderSel(){
       const c = document.createElement('button');
       c.type = 'button';
       const boss = p === PER_WORLD - 1;
-      c.className = 'cell' + (i < cleared ? ' done' : i === cleared ? ' cur' : i > cleared ? ' lock' : '')
+      c.className = 'cell' + (i < cleared ? ' done' : i === cur ? ' cur' : i > cleared ? ' lock' : '')
         + (boss ? ' boss' : '');
       c.textContent = boss ? 'B' : (p + 1);
       if(i <= cleared){
@@ -482,7 +499,7 @@ function renderSel(){
       } else {
         c.disabled = true;
       }
-      if(starMap[i]) {
+      if(starMap[i]){
         const s = document.createElement('span');
         s.className = 'stars';
         s.textContent = '★'.repeat(starMap[i]);
@@ -493,20 +510,19 @@ function renderSel(){
     blk.appendChild(grid);
     body.appendChild(blk);
   }
-  const eb = el('endlessBtn');
-  if(cleared >= ENDLESS_UNLOCK){ eb.classList.remove('hide'); eb.disabled = false; }
-  else { eb.classList.add('hide'); }
+  el('endlessBtn').classList.toggle('hide', cleared < ENDLESS_UNLOCK);
 }
 
 el('toSel').addEventListener('click', e => { e.stopPropagation(); showSel(); });
 el('selClose').addEventListener('click', e => { e.stopPropagation(); showStart(); });
 el('endlessBtn').addEventListener('click', e => { e.stopPropagation(); startStage(0, 'endless'); });
+el('endlessTop').addEventListener('click', e => { e.stopPropagation(); startStage(0, 'endless'); });
 
 /* ---------- start screen ---------- */
 function showStart(){
   state = 'idle';
   elSel.classList.add('hide'); elEnd.classList.add('hide'); elHud.classList.add('hide');
-  elMid.classList.add('hide');
+  elMid.classList.add('hide'); el('inst').classList.add('hide');
   elStart.classList.remove('hide');
   elTag.classList.remove('hide');
 
@@ -521,6 +537,8 @@ function showStart(){
   el('dailyLbl').textContent = 'DAILY · ' + d.label;
   el('dailyTxt').textContent = d.done ? 'PLAYED · ' + d.score : 'PLAY';
   el('daily').classList.toggle('done', d.done);
+
+  el('endlessTop').classList.toggle('hide', cleared < ENDLESS_UNLOCK);
 }
 
 /* ---------- daily ---------- */
@@ -546,9 +564,7 @@ el('daily').addEventListener('click', e => {
   const d = dailyInfo();
   if(d.done){ showToast('ALREADY PLAYED TODAY'); return; }
   const rnd = seeded(d.key);
-  startStage(Math.floor(rnd() * TOTAL), 'stage');
-  quota = 12; hitsLeft = 12;
-  elMid.textContent = 'DAILY · ' + d.label + ' · 12 HITS';
+  startStage(Math.floor(rnd() * TOTAL), 'daily');
   track('daily_played', { key: d.key });
 });
 
@@ -635,6 +651,11 @@ function die(signedErr){
     failsOnStage++;
   }
 
+  if(mode === 'daily'){
+    const d = dailyInfo();
+    localStorage.setItem('p.daily', JSON.stringify({ d: d.key, s: Math.max(d.score, score) }));
+  }
+
   if(score > best){
     best = score; localStorage.setItem('pulse.best', best);
     ghost = runHits.slice(0, 60);
@@ -645,7 +666,8 @@ function die(signedErr){
   burst(26, '#ff5c78'); buzz([45]); beep(120, 0.3, 'sawtooth', 0.08);
   saveProf();
 
-  track(mode === 'endless' ? 'endless_end' : 'stage_fail', {
+  track(mode === 'endless' ? 'endless_end'
+    : mode === 'daily' ? 'daily_fail' : 'stage_fail', {
     stage, hits, hits_left: hitsLeft, score, fails: failsOnStage,
     tune_v: TUNE_VERSION, close: closeDeath
   });
@@ -656,15 +678,21 @@ function die(signedErr){
 function clear(){
   state = 'clear';
   const stars = nonPerfect === 0 ? 3 : nonPerfect <= 1 ? 2 : 1;
+
   if(mode === 'stage'){
     starMap[stage] = Math.max(starMap[stage] || 0, stars);
     localStorage.setItem('p.stars', JSON.stringify(starMap));
     if(stage + 1 > cleared){ cleared = stage + 1; localStorage.setItem('p.cleared', cleared); }
     failsOnStage = 0;
     track('stage_clear', { stage, stars, score, perfects, tune_v: TUNE_VERSION });
+  } else if(mode === 'daily'){
+    const d = dailyInfo();
+    localStorage.setItem('p.daily', JSON.stringify({ d: d.key, s: Math.max(d.score, score) }));
+    track('daily_clear', { score, hits });
   } else {
     track('endless_clear', { score });
   }
+
   flash = 1; flashC = '125,255,196';
   burst(40, '#7dffc4'); beep(1318, 0.25, 'triangle', 0.09); buzz([20, 40, 20]);
   showEnd(true, stars);
@@ -678,9 +706,10 @@ function showEnd(won, stars){
   const om = el('oneMore');
 
   if(won){
-    el('endGrade').textContent = won && stars === 3 ? 'S' : stars === 2 ? 'A' : 'B';
+    el('endGrade').textContent = stars === 3 ? 'S' : stars === 2 ? 'A' : 'B';
     el('endGrade').style.color = '#7dffc4';
-    el('endMsg').textContent = mode === 'endless' ? 'RUN OVER' : 'STAGE CLEARED';
+    el('endMsg').textContent = mode === 'endless' ? 'RUN OVER'
+      : mode === 'daily' ? 'DAILY CLEARED' : 'STAGE CLEARED';
     es.classList.remove('hide');
     es.innerHTML = [1, 2, 3].map(n => `<span class="${n <= stars ? '' : 'off'}">★</span>`).join('');
     om.classList.add('hide');
@@ -692,7 +721,8 @@ function showEnd(won, stars){
   } else {
     el('endGrade').textContent = gradeOf(hits);
     el('endGrade').style.color = '#8fd8ff';
-    el('endMsg').textContent = mode === 'endless' ? 'ENDLESS' : 'STAGE ' + ((stage % PER_WORLD) + 1);
+    el('endMsg').textContent = mode === 'endless' ? 'ENDLESS'
+      : mode === 'daily' ? 'DAILY' : 'STAGE ' + ((stage % PER_WORLD) + 1);
     es.classList.add('hide');
     om.classList.toggle('hide', !(hitsLeft === 1 && mode === 'stage'));
     const b = document.createElement('button');
@@ -727,11 +757,12 @@ function ghostRadius(){
   return prev.r + (cur.r - prev.r) * k;
 }
 
-let launched = false;
+let booted = false;
 async function launch(e){
-  if(launched) return;
   if(e){ e.preventDefault(); e.stopPropagation(); }
-  launched = true;
+
+  if(booted){ startStage(Math.min(cleared, TOTAL - 1), 'stage'); return; }
+  booted = true;
 
   const days = lastPlayed ? Math.round((Date.now() - lastPlayed) / 86400000) : -1;
   track('session_start', { returning: days >= 0, days_since: days, cleared });
@@ -755,7 +786,7 @@ async function launch(e){
   }catch(_){}
   try{ wl = await navigator.wakeLock.request('screen'); }catch(_){}
 
-  startStage(cleared > 0 ? Math.min(cleared, TOTAL - 1) : 0, 'stage');
+  startStage(Math.min(cleared, TOTAL - 1), 'stage');
 }
 
 /* ---------- loop ---------- */
@@ -860,11 +891,12 @@ function frame(t){
 /* ---------- input ---------- */
 el('go').addEventListener('click', launch);
 el('resume').addEventListener('click', launch);
-addEventListener('touchend', e => { if(!launched) launch(e); }, { passive: false });
+addEventListener('touchend', e => { if(!booted) launch(e); }, { passive: false });
 
 addEventListener('pointerdown', e => {
-  if(!launched) return;
+  if(!booted) return;
   if(e.target.closest('button, #daily, #resume')) return;
+  if(state === 'select') return;
   e.preventDefault();
   if(state === 'play' || state === 'dead') tap();
 }, { passive: false });
@@ -872,7 +904,7 @@ addEventListener('pointerdown', e => {
 addEventListener('keydown', e => {
   if(e.code === 'Space' || e.code === 'Enter'){
     e.preventDefault();
-    if(!launched) launch();
+    if(!booted) launch();
     else if(state === 'play' || state === 'dead') tap();
   }
 });

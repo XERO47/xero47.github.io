@@ -31,19 +31,71 @@
   .hud b{font-size:38px;display:block;line-height:.9}
   .hud span{font-size:10px;opacity:.45;letter-spacing:.22em}
   #right{text-align:right}
-  #start{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:18px;
-    background:radial-gradient(circle at 50% 45%,#0d1524,#06070c 70%);z-index:5;text-align:center}
-  #start h1{font-size:13vw;letter-spacing:.24em;font-weight:800;
+  #mid{position:fixed;top:calc(env(safe-area-inset-top) + 22px);left:0;right:0;
+    text-align:center;font-size:10px;letter-spacing:.24em;opacity:.4;z-index:3;
+    pointer-events:none;font-variant-numeric:tabular-nums}
+
+  .screen{position:fixed;inset:0;z-index:5;display:grid;place-content:center;
+    justify-items:center;gap:16px;text-align:center;padding:24px;
+    background:radial-gradient(circle at 50% 45%,#0d1524,#06070c 72%)}
+  h1{font-size:13vw;letter-spacing:.24em;font-weight:800;
     background:linear-gradient(90deg,#4be3ff,#b06cff);-webkit-background-clip:text;
     background-clip:text;color:transparent}
-  #start p{font-size:11px;opacity:.5;letter-spacing:.2em;margin-top:-8px}
-  #go{margin-top:14px;padding:22px 46px;border:0;border-radius:999px;font:800 15px/1 inherit;
-    letter-spacing:.22em;color:#04070c;background:linear-gradient(90deg,#5ff0ff,#a97bff);
-    box-shadow:0 0 44px #4be3ff66;animation:pl 1.8s ease-in-out infinite}
-  @keyframes pl{50%{transform:scale(1.05)}}
-  #tag{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 22px);left:0;right:0;
+  .sub{font-size:11px;opacity:.5;letter-spacing:.2em;margin-top:-10px}
+  .btn{margin-top:10px;padding:20px 44px;border:0;border-radius:999px;font:800 14px/1 inherit;
+    letter-spacing:.2em;color:#04070c;background:linear-gradient(90deg,#5ff0ff,#a97bff);
+    box-shadow:0 0 40px #4be3ff55}
+  .btn.dim{background:#182232;color:#9fb6cc;box-shadow:none}
+  .btn:active{transform:scale(.97)}
+  .chip{padding:12px 22px;border:1px solid #22303f;border-radius:999px;font:700 11px/1 inherit;
+    letter-spacing:.18em;color:#9fb6cc;background:#0d1622}
+
+  #resume{display:grid;gap:2px;padding:14px 26px;border:1px solid #1d3b4d;
+    border-radius:16px;background:#0a1720}
+  #resume .rl{font-size:9px;letter-spacing:.26em;color:#4be3ff;opacity:.8}
+  #resume b{font-size:17px;letter-spacing:.1em}
+
+  #daily{border:1px solid #3b2d5c;border-radius:16px;background:#150f22;padding:14px 30px;
+    display:grid;gap:3px}
+  #daily .dl{font-size:9px;letter-spacing:.26em;color:#b06cff}
+  #daily b{font-size:15px;letter-spacing:.08em}
+  #daily.done{opacity:.45}
+
+  #tag{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 18px);left:0;right:0;
     text-align:center;font-size:10px;letter-spacing:.28em;opacity:.3;pointer-events:none;
     padding:0 24px;line-height:1.6}
+
+  #sel{background:#06070c;place-content:start center;overflow-y:auto;
+    padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 20px);
+    touch-action:pan-y;justify-items:stretch}
+  #selHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  #selHead b{font-size:13px;letter-spacing:.22em;opacity:.6}
+  .wblk{margin-bottom:18px}
+  .wlab{font-size:9px;letter-spacing:.26em;opacity:.35;margin-bottom:8px}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .cell{aspect-ratio:1;border-radius:12px;border:1px solid #1a2531;background:#0b1219;
+    display:grid;place-content:center;gap:3px;font:800 13px/1 inherit;color:#5b7286}
+  .cell.done{background:#0f2330;border-color:#2a5f7d;color:#8fe4ff}
+  .cell.cur{border-color:#4be3ff;color:#4be3ff;box-shadow:0 0 18px #4be3ff44}
+  .cell.lock{opacity:.32}
+  .cell.boss{border-color:#5c3b2d}
+  .stars{font-size:8px;letter-spacing:1px;color:#ffd24a}
+
+  #end{background:rgba(6,7,12,.82);backdrop-filter:blur(6px)}
+  #endScore{font-size:66px;font-weight:800;line-height:.9}
+  #endGrade{font-size:42px;font-weight:800;color:#8fd8ff}
+  #endMsg{font-size:11px;letter-spacing:.24em;opacity:.6}
+  #endStars{font-size:30px;letter-spacing:8px;color:#ffd24a}
+  #endStars .off{color:#22303f}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+  #oneMore{font-size:12px;letter-spacing:.3em;color:#ffb3c1;
+    animation:bl 1s ease-in-out infinite}
+  @keyframes bl{50%{opacity:.35}}
+
+  #inst{position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 16px);
+    z-index:8;background:#0d1a26;border:1px solid #1d3b4d;border-radius:18px;
+    padding:16px;display:grid;gap:12px;text-align:center}
+  #inst p{font-size:10px;letter-spacing:.2em;opacity:.65;line-height:1.6}
   #dbg{position:fixed;left:8px;bottom:calc(env(safe-area-inset-bottom) + 70px);
     font:500 9px/1.5 ui-monospace,monospace;color:#7dffc4;opacity:.8;
     white-space:pre;pointer-events:none;z-index:9;display:none}
@@ -52,92 +104,126 @@
 </head>
 <body>
 <canvas id="c"></canvas>
+
 <div class="hud hide" id="hud">
   <div><b id="score">0</b><span>SCORE</span></div>
   <div id="right"><b id="best">0</b><span>BEST</span></div>
 </div>
-<div id="start">
+<div id="mid" class="hide"></div>
+
+<div id="start" class="screen">
   <h1>PULSE</h1>
-  <p>TAP WHEN THE RINGS TOUCH</p>
-  <button id="go" type="button">PLAY</button>
+  <p class="sub">TAP WHEN THE RINGS TOUCH</p>
+  <div id="resume" class="hide">
+    <span class="rl">RESUME</span>
+    <b id="resumeTxt">STAGE 1</b>
+  </div>
+  <div id="daily">
+    <span class="dl" id="dailyLbl">DAILY</span>
+    <b id="dailyTxt">PLAY</b>
+  </div>
+  <button class="btn" id="go" type="button">PLAY</button>
+  <button class="chip" id="toSel" type="button">ALL STAGES</button>
 </div>
+
+<div id="sel" class="screen hide">
+  <div id="selHead">
+    <b>STAGES</b>
+    <button class="chip" id="selClose" type="button">CLOSE</button>
+  </div>
+  <div id="selBody"></div>
+  <button class="chip" id="endlessBtn" type="button" style="margin-top:6px">ENDLESS</button>
+</div>
+
+<div id="end" class="screen hide">
+  <div id="endGrade">D</div>
+  <div id="endScore">0</div>
+  <div id="endStars" class="hide"></div>
+  <div id="oneMore" class="hide">ONE MORE</div>
+  <div id="endMsg"></div>
+  <div class="row" id="endBtns"></div>
+</div>
+
+<div id="inst" class="hide">
+  <p id="instTxt">ADD TO HOME SCREEN — ONE TAP TO PLAY ANY TIME</p>
+  <div class="row">
+    <button class="btn" id="instGo" type="button" style="padding:16px 34px">ADD</button>
+    <button class="chip" id="instNo" type="button">LATER</button>
+  </div>
+</div>
+
 <div id="tag">ONE THUMB · ONE TAP</div>
 <div id="dbg"></div>
+
 <script>
 'use strict';
 
 /* ============================================================================
-   ██  TUNING  ██  — everything that decides how the game feels lives here.
-   Nothing below this block hardcodes a difficulty number.
+   ██  TUNING  ██
    ============================================================================ */
-const TUNE_VERSION = 2;  // bump whenever TUNE changes, so analytics can compare versions
+const TUNE_VERSION = 3;
 const TUNE = {
-
-  /* ---- pace: how much time the player gets ---- */
-  startWindowMs:  1300,  // time a ring takes to reach the target at hit 0, ms
-  minWindowMs:    420,   // absolute floor on the window, ms
-  rampPerHit:     0.012, // fraction the window shortens per hit
-  speedMin:       0.12,  // px/s floor, as a fraction of screen
-  speedMax:       1.20,  // px/s ceiling, as a fraction of screen
-  startSpeedSlow: 0.18,  // opening speed, first runs
-  startSpeedNorm: 0.22,  // opening speed, established players
-
-  /* ---- tolerance: how forgiving the hit band is ---- */
-  tolBase:        0.090, // starting band, as a fraction of screen
-  decayPerHit:    0.982, // band shrink per hit. Higher = easier
-  tolFloor:       0.040, // absolute band floor
-  deathBand:      2.20,  // how far past the target ends the run, in band-widths
-  perfectFrac:    0.30,  // fraction of the band that counts as PERFECT
-
-  /* ---- the learning controller ---- */
+  minWindowMs:    420,
+  speedMin:       0.12,
+  speedMax:       1.20,
+  startSpeedSlow: 0.18,
+  startSpeedNorm: 0.22,
+  tolBase:        0.090,
+  decayPerHit:    0.982,
+  tolFloor:       0.040,
+  deathBand:      1.30,
+  perfectFrac:    0.30,
   tolMulStart:    1.00,
-  tolMulMin:      0.70,  // floor for the learned multiplier
-  tolMulMax:      2.40,  // ceiling
-  runHitsLow:     10,    // runs shorter than this widen the band
-  runHitsHigh:    22,    // runs longer than this tighten it
-  widen:          1.08,  // widen factor per short run
-  tighten:        0.96,  // tighten factor per long run
-  emaRate:        0.18,  // how fast the hit-rate estimate tracks reality
-  errWindow:      40,    // error samples kept
-  rtWindow:       20,    // reaction-time samples kept
-  biasRate:       0.15,  // how fast the target chases their instinct
-  biasClampFrac:  0.40,  // max bias shift, in band-widths
-
-  /* ---- onboarding ---- */
-  onboardingRuns: 2,     // runs that get the boost
-  onboardingHits: 15,    // total hits that get the boost
-  onboardingMul:  1.50,  // band multiplier during onboarding
-
-  /* ---- mercy after a near-miss ---- */
+  tolMulMin:      0.70,
+  tolMulMax:      2.40,
+  clampLo:        0.80,
+  clampHi:        1.20,
+  runHitsLow:     10,
+  runHitsHigh:    22,
+  widen:          1.08,
+  tighten:        0.96,
+  errWindow:      40,
+  rtWindow:       20,
+  biasRate:       0.15,
+  biasClampFrac:  0.40,
+  onboardingStages: 3,
+  onboardingMul:  1.50,
   mercyTaps:      5,
   mercyMul:       1.50,
-  closeBand:      1.40,  // what counts as "SO CLOSE", in band-widths. Keep below deathBand
-
-  /* ---- content gates ---- */
-  unlockDriftHits: 15,   // hits needed to unlock DRIFT
-  unlockDriftRate: 0.62, // hit-rate needed to unlock DRIFT
+  closeBand:      1.40,
   unlockBonusHits: 40,
   unlockBonusRate: 0.68,
-  boredMs:         4200, // retry latency that means they're bored
-  goldChance:      0.12,
-  driftAmp:        0.022, // drift amplitude, fraction of screen
-  driftSpeed:      1.50,  // drift phase speed
-
-  /* ---- feel ---- */
-  restartDelayMs:  350,
-  shakeDecay:      0.90,
-  flashDecay:      0.92
-
+  boredMs:        4200,
+  goldChance:     0.12,
+  goldBandMul:    0.50,
+  driftAmp:       0.022,
+  driftSpeed:     1.50,
+  offsetMax:      0.05,
+  restartDelayMs: 260,
+  shakeDecay:     0.90,
+  flashDecay:     0.92
 };
+
+const WORLDS = 6, PER_WORLD = 10, TOTAL = WORLDS * PER_WORLD;
+const LEVEL = {
+  tolMul:   [1.15, 1.05, 0.95, 0.88, 0.82, 0.75],
+  windowMs: [1300, 1150, 1050,  950,  880,  820],
+  ramp:     [0.012, 0.014, 0.016, 0.018, 0.020, 0.022]
+};
+const MODS = ['none', 'drift', 'gold', 'offset', 'fade', 'drift+offset'];
+const WNAME = ['OPEN', 'DRIFT', 'GOLD', 'OFFSET', 'FADE', 'STORM'];
+const ENDLESS_UNLOCK = 20;
 /* ========================================================================== */
 
 const cv = document.getElementById('c'), g = cv.getContext('2d');
-const elScore = document.getElementById('score'), elBest = document.getElementById('best');
-const elStart = document.getElementById('start'), elHud = document.getElementById('hud');
-const elTag = document.getElementById('tag'), elGo = document.getElementById('go');
-const elDbg = document.getElementById('dbg');
+const el = id => document.getElementById(id);
+const elScore = el('score'), elBest = el('best'), elMid = el('mid');
+const elHud = el('hud'), elStart = el('start'), elSel = el('sel'), elEnd = el('end');
+const elTag = el('tag'), elDbg = el('dbg'), elEndBtns = el('endBtns');
 const DEBUG = new URLSearchParams(location.search).has('debug');
-const PROFILE_VERSION = 4;
+const PROFILE_VERSION = 5;
+
+const track = (n, p) => { try{ if(typeof gtag === 'function') gtag('event', n, p || {}); }catch(_){} };
 
 let W = 0, H = 0, DPR = 1, MIN = 0, TARGET = 0, MAXR = 0, CX = 0, CY = 0;
 let state = 'idle', ringR = 0, speed = 0, score = 0, hits = 0;
@@ -146,7 +232,14 @@ let ghost = JSON.parse(localStorage.getItem('pulse.ghost') || '[]');
 let shake = 0, flash = 0, flashC = '255,255,255', deadAt = 0, newBest = false;
 let parts = [], pops = [], tPrev = 0, hue = 188, audio = null, wl = null;
 let runT = 0, runHits = [], mercy = 0, closeDeath = false;
-let driftPhase = 0, goldNext = false;
+let driftPhase = 0, goldNext = false, offR = 0;
+
+let mode = 'stage';
+let stage = 0, quota = 0, perfects = 0, nonPerfect = 0, failsOnStage = 0, hitsLeft = 0;
+let cleared = +(localStorage.getItem('p.cleared') || 0);
+let starMap = JSON.parse(localStorage.getItem('p.stars') || '{}');
+let lastPlayed = +(localStorage.getItem('p.last') || 0);
+let installEvt = null, installAsked = +(localStorage.getItem('p.instask') || 0);
 elBest.textContent = best;
 
 /* ---------- player model ---------- */
@@ -155,17 +248,14 @@ if(+(localStorage.getItem('p.ver') || 0) !== PROFILE_VERSION){
   localStorage.removeItem('p.bias');
   localStorage.setItem('p.ver', PROFILE_VERSION);
 }
-
 const prof = {
   err: [], rt: [], retryGaps: [],
   tolMul: +(localStorage.getItem('p.tol') || TUNE.tolMulStart),
   bias: +(localStorage.getItem('p.bias') || 0),
   successEma: 0.7,
-  runs: 0, deaths: 0, totalHits: +(localStorage.getItem('p.hits') || 0),
-  unlocked: JSON.parse(localStorage.getItem('p.unl') || '{"drift":false,"bonus":false}'),
-  lastResetAt: 0
+  totalHits: +(localStorage.getItem('p.hits') || 0),
+  unlocked: JSON.parse(localStorage.getItem('p.unl') || '{"bonus":false}')
 };
-
 function saveProf(){
   localStorage.setItem('p.tol', prof.tolMul);
   localStorage.setItem('p.bias', prof.bias);
@@ -179,46 +269,51 @@ const median = a => {
 };
 const medErr = () => median(prof.err);
 const medRT = () => median(prof.rt) || 480;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-/* ---------- difficulty expressions ---------- */
-const onboarding = () => (prof.runs < TUNE.onboardingRuns || prof.totalHits < TUNE.onboardingHits)
+const world = () => Math.min(WORLDS - 1, Math.floor(stage / PER_WORLD));
+const isBoss = () => mode === 'stage' && stage % PER_WORLD === PER_WORLD - 1;
+const hasMod = m => mode === 'endless' || MODS[world()].includes(m);
+const isGoldStage = () => mode === 'endless' || MODS[world()] === 'gold' || MODS[world()] === 'drift+offset';
+const quotaFor = i => (i % PER_WORLD === PER_WORLD - 1) ? 10
+  : Math.min(3 + Math.floor((i % PER_WORLD) / 2), 8);
+
+const onboarding = () => (mode === 'stage' && stage < TUNE.onboardingStages)
   ? TUNE.onboardingMul : 1;
+const mercyOn = () => mode === 'stage' && world() <= 2;
+
+function effTolMul(){
+  const base = mode === 'endless' ? prof.tolMul : LEVEL.tolMul[world()];
+  return mode === 'endless' ? prof.tolMul
+    : clamp(prof.tolMul, base * TUNE.clampLo, base * TUNE.clampHi);
+}
+function bandMul(){ return (goldNext && isGoldStage()) ? TUNE.goldBandMul : 1; }
 
 const tolerance = () => MIN
   * Math.max(TUNE.tolFloor, TUNE.tolBase * Math.pow(TUNE.decayPerHit, hits))
-  * prof.tolMul * onboarding() * (mercy > 0 ? TUNE.mercyMul : 1);
+  * effTolMul() * onboarding() * (mercy > 0 ? TUNE.mercyMul : 1) * bandMul();
 
-const aimR = () => TARGET + prof.bias
-  + (prof.unlocked.drift ? Math.sin(driftPhase) * MIN * TUNE.driftAmp : 0);
+const aimR = () => TARGET + prof.bias + offR
+  + (hasMod('drift') ? Math.sin(driftPhase) * MIN * TUNE.driftAmp : 0);
 
-function learn(signedErr, rt, wasHit){
-  prof.err.push(signedErr); if(prof.err.length > TUNE.errWindow) prof.err.shift();
+function learn(err, rt, wasHit){
+  prof.err.push(err); if(prof.err.length > TUNE.errWindow) prof.err.shift();
   prof.rt.push(rt); if(prof.rt.length > TUNE.rtWindow) prof.rt.shift();
-
-  prof.successEma += ((wasHit ? 1 : 0) - prof.successEma) * TUNE.emaRate;
-
+  prof.successEma += ((wasHit ? 1 : 0) - prof.successEma) * 0.18;
   if(prof.err.length >= 4){
     const cap = tolerance() * TUNE.biasClampFrac;
-    const want = Math.max(-cap, Math.min(cap, medErr() * 0.5));
+    const want = clamp(medErr() * 0.5, -cap, cap);
     prof.bias += (want - prof.bias) * TUNE.biasRate;
   }
-
   if(wasHit){
     prof.totalHits++;
-    if(!prof.unlocked.drift && prof.totalHits >= TUNE.unlockDriftHits
-      && prof.successEma > TUNE.unlockDriftRate){
-      prof.unlocked.drift = true; announce('DRIFT');
-    }
     if(!prof.unlocked.bonus && prof.totalHits >= TUNE.unlockBonusHits
       && prof.successEma > TUNE.unlockBonusRate){
-      prof.unlocked.bonus = true; announce('GOLD');
+      prof.unlocked.bonus = true; announce('GOLD RINGS');
     }
   }
-
   if(prof.retryGaps.length >= 4 && median(prof.retryGaps.slice(-4)) > TUNE.boredMs){
-    if(!prof.unlocked.drift){ prof.unlocked.drift = true; announce('DRIFT'); }
-    else if(!prof.unlocked.bonus){ prof.unlocked.bonus = true; announce('GOLD'); }
-    prof.retryGaps = [];
+    prof.unlocked.bonus = true; prof.retryGaps = [];
   }
   saveProf();
 }
@@ -251,20 +346,17 @@ const buzz = ms => navigator.vibrate && navigator.vibrate(ms);
 
 /* ---------- fullscreen ---------- */
 const DE = document.documentElement;
-const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement
-  || document.msFullscreenElement;
-const fsOn = () => !!(DE.requestFullscreen || DE.webkitRequestFullscreen
-  || DE.webkitRequestFullScreen || DE.mozRequestFullScreen || DE.msRequestFullscreen);
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+const fsOn = () => !!(DE.requestFullscreen || DE.webkitRequestFullscreen || DE.webkitRequestFullScreen);
 const standalone = () => navigator.standalone === true
   || matchMedia('(display-mode:standalone)').matches
   || matchMedia('(display-mode:fullscreen)').matches;
 
-function rawFS(el){
-  const fn = el.requestFullscreen || el.webkitRequestFullscreen
-    || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+function rawFS(elx){
+  const fn = elx.requestFullscreen || elx.webkitRequestFullscreen || elx.webkitRequestFullScreen;
   if(!fn) return Promise.reject(new Error('unsupported'));
-  try{ fn.call(el, { navigationUI: 'hide' }); }
-  catch(_){ try{ fn.call(el); }catch(e){ return Promise.reject(e); } }
+  try{ fn.call(elx, { navigationUI: 'hide' }); }
+  catch(_){ try{ fn.call(elx); }catch(e){ return Promise.reject(e); } }
   return new Promise((res, rej) => {
     let n = 0;
     const iv = setInterval(() => {
@@ -273,23 +365,37 @@ function rawFS(el){
     }, 40);
   });
 }
-
 function hideBars(){
   document.body.style.height = 'calc(100% + 1px)';
   window.scrollTo(0, 1);
   setTimeout(() => window.scrollTo(0, 1), 120);
 }
+const isIOS = () => /iP(hone|od|ad)/.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-function iosHint(){
-  const ios = /iP(hone|od|ad)/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if(ios && !standalone()){
-    elTag.textContent = 'SHARE → ADD TO HOME SCREEN FOR TRUE FULLSCREEN';
-    elTag.style.opacity = '0.55';
-  }
+/* ---------- install ---------- */
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; });
+function maybeAskInstall(){
+  if(standalone() || installAsked > 0) return;
+  if(!installEvt && !isIOS()) return;
+  installAsked = 1; localStorage.setItem('p.instask', 1);
+  el('instTxt').textContent = installEvt
+    ? 'ADD TO HOME SCREEN — ONE TAP TO PLAY ANY TIME'
+    : 'SHARE → ADD TO HOME SCREEN — ONE TAP TO PLAY ANY TIME';
+  el('inst').classList.remove('hide');
+  track('install_prompt_shown', { stage, ios: isIOS() });
 }
+el('instGo').addEventListener('click', async e => {
+  e.stopPropagation();
+  el('inst').classList.add('hide');
+  if(installEvt){ installEvt.prompt(); await installEvt.userChoice; installEvt = null; track('installed'); }
+  else track('install_instructions');
+});
+el('instNo').addEventListener('click', e => {
+  e.stopPropagation(); el('inst').classList.add('hide');
+});
 
-/* ---------- game ---------- */
+/* ---------- fx ---------- */
 function burst(n, col){
   for(let i = 0; i < n; i++){
     const a = Math.random() * Math.PI * 2, s = MIN * (0.12 + Math.random() * 0.5);
@@ -297,30 +403,187 @@ function burst(n, col){
       vx: Math.cos(a) * s, vy: Math.sin(a) * s, r: 2 + Math.random() * 3, life: 1, c: col });
   }
 }
-
 function announce(t){
   pops.push({ x: CX, y: CY - TARGET - 46, t: 'NEW: ' + t, s: 18, c: '#7dffc4', life: 2 });
   beep(1046, 0.16, 'triangle', 0.07); buzz([10, 50, 10]);
 }
 
-function reset(){
-  if(deadAt) prof.retryGaps.push(performance.now() - deadAt);
-  if(prof.retryGaps.length > 8) prof.retryGaps.shift();
+/* ---------- flow ---------- */
+function startStage(i, m){
+  mode = m || 'stage';
+  stage = i;
+  quota = mode === 'endless' ? Infinity : quotaFor(i);
+  perfects = 0; nonPerfect = 0; hits = 0; score = 0; hitsLeft = quota;
+  parts = []; pops = []; shake = 0; flash = 0; hue = 188;
+  runT = 0; runHits = []; closeDeath = false; goldNext = false;
+  driftPhase = 0; offR = 0; newBest = false;
+  elScore.textContent = '0';
+  elEnd.classList.add('hide'); elSel.classList.add('hide'); elStart.classList.add('hide');
+  elHud.classList.remove('hide'); elMid.classList.remove('hide');
+  elTag.classList.add('hide');
+  if(DEBUG) elDbg.style.display = 'block';
 
-  ringR = MAXR; score = 0; hits = 0;
-  parts = []; pops = []; shake = 0; flash = 0; hue = 188; newBest = false;
-  runT = 0; runHits = []; closeDeath = false; goldNext = false; driftPhase = 0;
-  if(mercy > 0) mercy = TUNE.mercyTaps;
-  prof.runs++; prof.lastResetAt = performance.now();
-  state = 'play'; elScore.textContent = '0';
-  speed = MIN * (prof.runs < TUNE.onboardingRuns ? TUNE.startSpeedSlow : TUNE.startSpeedNorm);
+  elMid.textContent = mode === 'endless'
+    ? 'ENDLESS' : 'W' + (world() + 1) + ' · STAGE ' + ((stage % PER_WORLD) + 1)
+      + (isBoss() ? ' · BOSS' : '') + ' · ' + WNAME[world()];
+
+  const wm = mode === 'endless' ? LEVEL.windowMs[5] : LEVEL.windowMs[world()];
+  speed = MIN * (stage < TUNE.onboardingStages ? TUNE.startSpeedSlow : TUNE.startSpeedNorm);
+  ringR = MAXR;
+  state = 'play';
+  prof.lastResetAt = performance.now();
+
+  track(mode === 'endless' ? 'endless_start' : 'stage_start',
+    { stage, world: world(), boss: isBoss() });
+}
+
+function nextStage(){
+  if(mode === 'endless'){ startStage(stage, 'endless'); return; }
+  if(stage + 1 >= TOTAL){ showSel(); return; }
+  startStage(stage + 1, 'stage');
+}
+
+function prevStage(){
+  if(stage <= 0){ showSel(); return; }
+  failsOnStage = 0;
+  startStage(stage - 1, 'stage');
+}
+
+function showSel(){
+  state = 'select';
+  elHud.classList.add('hide'); elMid.classList.add('hide'); elTag.classList.add('hide');
+  elEnd.classList.add('hide'); elStart.classList.add('hide');
+  elSel.classList.remove('hide');
+  renderSel();
+}
+
+function renderSel(){
+  const body = el('selBody');
+  body.innerHTML = '';
+  for(let w = 0; w < WORLDS; w++){
+    const blk = document.createElement('div');
+    blk.className = 'wblk';
+    const lab = document.createElement('div');
+    lab.className = 'wlab';
+    lab.textContent = 'WORLD ' + (w + 1) + ' · ' + WNAME[w];
+    blk.appendChild(lab);
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    for(let p = 0; p < PER_WORLD; p++){
+      const i = w * PER_WORLD + p;
+      const c = document.createElement('button');
+      c.type = 'button';
+      const boss = p === PER_WORLD - 1;
+      c.className = 'cell' + (i < cleared ? ' done' : i === cleared ? ' cur' : i > cleared ? ' lock' : '')
+        + (boss ? ' boss' : '');
+      c.textContent = boss ? 'B' : (p + 1);
+      if(i <= cleared){
+        c.addEventListener('click', e => { e.stopPropagation(); startStage(i, 'stage'); });
+      } else {
+        c.disabled = true;
+      }
+      if(starMap[i]) {
+        const s = document.createElement('span');
+        s.className = 'stars';
+        s.textContent = '★'.repeat(starMap[i]);
+        c.appendChild(s);
+      }
+      grid.appendChild(c);
+    }
+    blk.appendChild(grid);
+    body.appendChild(blk);
+  }
+  const eb = el('endlessBtn');
+  if(cleared >= ENDLESS_UNLOCK){ eb.classList.remove('hide'); eb.disabled = false; }
+  else { eb.classList.add('hide'); }
+}
+
+el('toSel').addEventListener('click', e => { e.stopPropagation(); showSel(); });
+el('selClose').addEventListener('click', e => { e.stopPropagation(); showStart(); });
+el('endlessBtn').addEventListener('click', e => { e.stopPropagation(); startStage(0, 'endless'); });
+
+/* ---------- start screen ---------- */
+function showStart(){
+  state = 'idle';
+  elSel.classList.add('hide'); elEnd.classList.add('hide'); elHud.classList.add('hide');
+  elMid.classList.add('hide');
+  elStart.classList.remove('hide');
+  elTag.classList.remove('hide');
+
+  const res = el('resume');
+  if(cleared > 0){
+    res.classList.remove('hide');
+    const target = Math.min(cleared, TOTAL - 1);
+    el('resumeTxt').textContent = 'STAGE ' + (target + 1) + ' · W' + (Math.floor(target / PER_WORLD) + 1);
+  } else res.classList.add('hide');
+
+  const d = dailyInfo();
+  el('dailyLbl').textContent = 'DAILY · ' + d.label;
+  el('dailyTxt').textContent = d.done ? 'PLAYED · ' + d.score : 'PLAY';
+  el('daily').classList.toggle('done', d.done);
+}
+
+/* ---------- daily ---------- */
+const todayKey = () => {
+  const d = new Date();
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+};
+function dailyInfo(){
+  const k = todayKey();
+  const rec = JSON.parse(localStorage.getItem('p.daily') || '{"d":0,"s":0}');
+  const d = new Date();
+  return {
+    key: k, done: rec.d === k, score: rec.d === k ? rec.s : 0,
+    label: (d.getMonth() + 1) + '/' + d.getDate()
+  };
+}
+function seeded(seed){
+  let s = seed % 2147483647; if(s <= 0) s += 2147483646;
+  return () => (s = s * 16807 % 2147483647) / 2147483647;
+}
+el('daily').addEventListener('click', e => {
+  e.stopPropagation();
+  const d = dailyInfo();
+  if(d.done){ showToast('ALREADY PLAYED TODAY'); return; }
+  const rnd = seeded(d.key);
+  startStage(Math.floor(rnd() * TOTAL), 'stage');
+  quota = 12; hitsLeft = 12;
+  elMid.textContent = 'DAILY · ' + d.label + ' · 12 HITS';
+  track('daily_played', { key: d.key });
+});
+
+/* ---------- run ---------- */
+function tap(){
+  if(state === 'dead'){
+    if(performance.now() - deadAt > TUNE.restartDelayMs){
+      mercy = (closeDeath && mercyOn()) ? TUNE.mercyTaps : 0;
+      startStage(stage, mode);
+    }
+    return;
+  }
+  if(state !== 'play') return;
+
+  const err = ringR - aimR();
+  const rt = performance.now() - prof.lastResetAt;
+  const tol = tolerance();
+
+  if(Math.abs(err) <= tol){
+    const perfect = Math.abs(err) <= tol * TUNE.perfectFrac;
+    learn(err, rt, true);
+    hit(perfect);
+  } else {
+    learn(err, rt, false);
+    die(err);
+  }
 }
 
 const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
 
 function hit(perfect){
   hits++;
+  hitsLeft = Math.max(0, quota - hits);
   if(mercy > 0) mercy--;
+  if(perfect) perfects++; else nonPerfect++;
   runHits.push({ t: runT, r: ringR });
 
   const gold = goldNext;
@@ -342,19 +605,22 @@ function hit(perfect){
     pops.push({ x: CX, y: CY + TARGET + 34, t: hits + '!', s: 40, c: '#ffdc78', life: 1 });
     flash = 0.6; flashC = '255,220,120'; buzz([10, 40, 10, 40, 10]);
   }
-
   shake = perfect ? 14 : 7;
   if(perfect){ flash = 0.5; flashC = '255,220,120'; }
 
   const semi = SCALE[hits % SCALE.length] + Math.floor(hits / SCALE.length) * 12;
   beep(220 * Math.pow(2, semi / 12), 0.07, 'triangle', 0.055);
 
-  const windowMs = Math.max(TUNE.minWindowMs, TUNE.startWindowMs / (1 + hits * TUNE.rampPerHit));
-  speed = Math.min(MIN * TUNE.speedMax, Math.max(MIN * TUNE.speedMin,
-    (MAXR - aimR()) / (windowMs / 1000)));
+  const wm = mode === 'endless' ? LEVEL.windowMs[5] : LEVEL.windowMs[world()];
+  const rm = mode === 'endless' ? LEVEL.ramp[5] : LEVEL.ramp[world()];
+  const windowMs = Math.max(TUNE.minWindowMs, wm / (1 + hits * rm));
+  speed = clamp((MAXR - aimR()) / (windowMs / 1000), MIN * TUNE.speedMin, MIN * TUNE.speedMax);
+
+  if(quota - hits <= 0){ clear(); return; }
 
   ringR = MAXR; hue = (hue + 27) % 360;
-  goldNext = prof.unlocked.bonus && Math.random() < TUNE.goldChance;
+  if(hasMod('offset')) offR = (Math.random() * 2 - 1) * MIN * TUNE.offsetMax;
+  goldNext = prof.unlocked.bonus && isGoldStage() && Math.random() < TUNE.goldChance;
 }
 
 function die(signedErr){
@@ -362,13 +628,12 @@ function die(signedErr){
   state = 'dead'; deadAt = performance.now();
   shake = 26; flash = 1; flashC = '255,70,100';
   newBest = score > 0 && score >= best;
-  prof.deaths++;
 
-  // every run ends in exactly one miss, so judge difficulty by run length, not per-tap rate
-  if(hits < TUNE.runHitsLow)
-    prof.tolMul = Math.min(TUNE.tolMulMax, prof.tolMul * TUNE.widen);
-  else if(hits > TUNE.runHitsHigh)
-    prof.tolMul = Math.max(TUNE.tolMulMin, prof.tolMul * TUNE.tighten);
+  if(mode === 'stage'){
+    if(hits < TUNE.runHitsLow) prof.tolMul = Math.min(TUNE.tolMulMax, prof.tolMul * TUNE.widen);
+    else if(hits > TUNE.runHitsHigh) prof.tolMul = Math.max(TUNE.tolMulMin, prof.tolMul * TUNE.tighten);
+    failsOnStage++;
+  }
 
   if(score > best){
     best = score; localStorage.setItem('pulse.best', best);
@@ -377,41 +642,76 @@ function die(signedErr){
   }
   elBest.textContent = best;
 
-  if(closeDeath){
-    pops.push({ x: CX, y: CY - TARGET - 20, t: 'SO CLOSE', s: 22, c: '#ffb3c1', life: 1.6 });
-    buzz([30, 60, 30]);
-  }
   burst(26, '#ff5c78'); buzz([45]); beep(120, 0.3, 'sawtooth', 0.08);
   saveProf();
 
-  if(typeof gtag === 'function') gtag('event', 'run_end', {
-    hits, score, run: prof.runs, close: closeDeath, new_best: newBest,
-    tol_mul: +prof.tolMul.toFixed(2), tune_v: TUNE_VERSION
+  track(mode === 'endless' ? 'endless_end' : 'stage_fail', {
+    stage, hits, hits_left: hitsLeft, score, fails: failsOnStage,
+    tune_v: TUNE_VERSION, close: closeDeath
   });
+
+  showEnd(false);
 }
 
-function tap(){
-  if(state === 'dead'){
-    if(performance.now() - deadAt > TUNE.restartDelayMs){
-      mercy = closeDeath ? TUNE.mercyTaps : 0;
-      reset();
-    }
-    return;
-  }
-  if(state !== 'play') return;
-
-  const err = ringR - aimR();
-  const rt = performance.now() - prof.lastResetAt;
-  const tol = tolerance();
-
-  if(Math.abs(err) <= tol){
-    const perfect = Math.abs(err) <= tol * TUNE.perfectFrac;
-    learn(err, rt, true);
-    hit(perfect);
+function clear(){
+  state = 'clear';
+  const stars = nonPerfect === 0 ? 3 : nonPerfect <= 1 ? 2 : 1;
+  if(mode === 'stage'){
+    starMap[stage] = Math.max(starMap[stage] || 0, stars);
+    localStorage.setItem('p.stars', JSON.stringify(starMap));
+    if(stage + 1 > cleared){ cleared = stage + 1; localStorage.setItem('p.cleared', cleared); }
+    failsOnStage = 0;
+    track('stage_clear', { stage, stars, score, perfects, tune_v: TUNE_VERSION });
   } else {
-    learn(err, rt, false);
-    die(err);
+    track('endless_clear', { score });
   }
+  flash = 1; flashC = '125,255,196';
+  burst(40, '#7dffc4'); beep(1318, 0.25, 'triangle', 0.09); buzz([20, 40, 20]);
+  showEnd(true, stars);
+  if(cleared === 1) maybeAskInstall();
+}
+
+function showEnd(won, stars){
+  elEnd.classList.remove('hide');
+  elEndBtns.innerHTML = '';
+  const es = el('endStars');
+  const om = el('oneMore');
+
+  if(won){
+    el('endGrade').textContent = won && stars === 3 ? 'S' : stars === 2 ? 'A' : 'B';
+    el('endGrade').style.color = '#7dffc4';
+    el('endMsg').textContent = mode === 'endless' ? 'RUN OVER' : 'STAGE CLEARED';
+    es.classList.remove('hide');
+    es.innerHTML = [1, 2, 3].map(n => `<span class="${n <= stars ? '' : 'off'}">★</span>`).join('');
+    om.classList.add('hide');
+    const b = document.createElement('button');
+    b.className = 'btn'; b.type = 'button';
+    b.textContent = (mode === 'stage' && stage + 1 >= TOTAL) ? 'ALL CLEAR' : 'NEXT';
+    b.addEventListener('click', e => { e.stopPropagation(); nextStage(); });
+    elEndBtns.appendChild(b);
+  } else {
+    el('endGrade').textContent = gradeOf(hits);
+    el('endGrade').style.color = '#8fd8ff';
+    el('endMsg').textContent = mode === 'endless' ? 'ENDLESS' : 'STAGE ' + ((stage % PER_WORLD) + 1);
+    es.classList.add('hide');
+    om.classList.toggle('hide', !(hitsLeft === 1 && mode === 'stage'));
+    const b = document.createElement('button');
+    b.className = 'btn'; b.type = 'button'; b.textContent = 'RETRY';
+    b.addEventListener('click', e => { e.stopPropagation(); startStage(stage, mode); });
+    elEndBtns.appendChild(b);
+    if(mode === 'stage' && failsOnStage >= 3){
+      const p = document.createElement('button');
+      p.className = 'chip'; p.type = 'button'; p.textContent = 'PREV STAGE';
+      p.addEventListener('click', e => { e.stopPropagation(); prevStage(); });
+      elEndBtns.appendChild(p);
+    }
+  }
+  el('endScore').textContent = score;
+
+  const s = document.createElement('button');
+  s.className = 'chip'; s.type = 'button'; s.textContent = 'STAGES';
+  s.addEventListener('click', e => { e.stopPropagation(); showSel(); });
+  elEndBtns.appendChild(s);
 }
 
 const gradeOf = h => h >= 40 ? 'S' : h >= 25 ? 'A' : h >= 15 ? 'B' : h >= 8 ? 'C' : 'D';
@@ -423,7 +723,7 @@ function ghostRadius(){
   const prev = { t: i === 0 ? 0 : ghost[i - 1].t, r: MAXR };
   const cur = ghost[i];
   const span = Math.max(cur.t - prev.t, 1);
-  const k = Math.min(Math.max((runT - prev.t) / span, 0), 1);
+  const k = clamp((runT - prev.t) / span, 0, 1);
   return prev.r + (cur.r - prev.r) * k;
 }
 
@@ -433,10 +733,9 @@ async function launch(e){
   if(e){ e.preventDefault(); e.stopPropagation(); }
   launched = true;
 
-  elStart.classList.add('hide');
-  elTag.classList.add('hide');
-  elHud.classList.remove('hide');
-  if(DEBUG) elDbg.style.display = 'block';
+  const days = lastPlayed ? Math.round((Date.now() - lastPlayed) / 86400000) : -1;
+  track('session_start', { returning: days >= 0, days_since: days, cleared });
+  localStorage.setItem('p.last', Date.now());
 
   let ok = standalone();
   if(!ok && fsOn()){
@@ -447,22 +746,23 @@ async function launch(e){
     }
   }
   if(ok){ try{ await screen.orientation.lock('portrait'); }catch(_){} }
-  else { hideBars(); iosHint(); }
+  else hideBars();
 
-  fit(); deadAt = 0; reset();
-
+  fit();
   try{
     audio = audio || new (window.AudioContext || window.webkitAudioContext)();
     await audio.resume();
   }catch(_){}
   try{ wl = await navigator.wakeLock.request('screen'); }catch(_){}
+
+  startStage(cleared > 0 ? Math.min(cleared, TOTAL - 1) : 0, 'stage');
 }
 
 /* ---------- loop ---------- */
 function update(dt){
   if(state === 'play'){
     runT += dt * 1000;
-    if(prof.unlocked.drift) driftPhase += dt * TUNE.driftSpeed;
+    if(hasMod('drift')) driftPhase += dt * TUNE.driftSpeed;
     ringR -= speed * dt;
     if(ringR < aimR() - tolerance() * TUNE.deathBand) die(ringR - aimR());
   }
@@ -481,11 +781,15 @@ function draw(){
   const bg = g.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.78);
   bg.addColorStop(0, '#0c1420'); bg.addColorStop(1, '#06070c');
   g.fillStyle = bg; g.fillRect(0, 0, W, H);
-  if(state === 'idle') return;
+  if(state !== 'play' && state !== 'dead') return;
 
   const tol = tolerance(), aim = aimR();
+  const fadeA = hasMod('fade')
+    ? clamp((ringR - aim) / (MIN * 0.22), 0.10, 1) : 1;
+
   g.save();
   if(shake > 0.4) g.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake);
+  g.globalAlpha = fadeA;
 
   g.lineWidth = tol * 2; g.strokeStyle = 'rgba(90,220,255,0.10)';
   g.beginPath(); g.arc(CX, CY, aim, 0, 7); g.stroke();
@@ -498,6 +802,7 @@ function draw(){
   g.beginPath(); g.arc(CX, CY, aim, 0, 7); g.stroke(); g.setLineDash([]);
   g.fillStyle = 'rgba(150,245,255,0.5)';
   g.beginPath(); g.arc(CX, CY, 3, 0, 7); g.fill();
+  g.globalAlpha = 1;
 
   if(state === 'play'){
     const gr = ghostRadius();
@@ -526,34 +831,22 @@ function draw(){
 
   if(flash > 0.01){ g.fillStyle = `rgba(${flashC},${flash * 0.5})`; g.fillRect(0, 0, W, H); }
 
-  if(state === 'dead'){
+  if(state === 'play' && quota !== Infinity){
     g.textAlign = 'center';
-    g.fillStyle = '#fff'; g.font = '800 68px ui-sans-serif,system-ui,sans-serif';
-    g.fillText(score, CX, H * 0.42);
-    g.font = '800 44px ui-sans-serif,system-ui,sans-serif';
-    g.fillStyle = newBest ? '#7dffc4' : '#8fd8ff';
-    g.fillText(gradeOf(hits), CX, H * 0.31);
-    g.font = '700 12px ui-sans-serif,system-ui,sans-serif';
-    g.fillStyle = newBest ? '#7dffc4' : 'rgba(255,255,255,.5)';
-    g.fillText(newBest ? 'NEW BEST' : 'BEST ' + best, CX, H * 0.48);
-    g.fillStyle = `rgba(255,255,255,${0.55 + 0.45 * Math.sin(performance.now() / 220)})`;
-    g.font = '800 14px ui-sans-serif,system-ui,sans-serif';
-    g.fillText('TAP TO RETRY', CX, H * 0.58);
+    g.font = '800 13px ui-sans-serif,system-ui,sans-serif';
+    g.fillStyle = 'rgba(255,255,255,0.35)';
+    g.fillText(Math.max(0, quota - hits) + ' LEFT', CX, CY + TARGET + 54);
   }
 
   if(DEBUG && state === 'play'){
     elDbg.textContent =
-      'bias   ' + prof.bias.toFixed(1) + 'px\n' +
-      'tolX   ' + prof.tolMul.toFixed(2) + '\n' +
-      'sRate  ' + prof.successEma.toFixed(2) + '\n' +
-      'medErr ' + medErr().toFixed(1) + 'px\n' +
-      'medRT  ' + medRT().toFixed(0) + 'ms\n' +
+      'stage  ' + stage + ' m=' + mode + '\n' +
+      'tolX   ' + effTolMul().toFixed(2) + '\n' +
+      'bias   ' + prof.bias.toFixed(1) + '\n' +
       'window ' + ((MAXR - aimR()) / speed * 1000).toFixed(0) + 'ms\n' +
-      'pace   ' + speed.toFixed(0) + 'px/s\n' +
       'band   ' + tol.toFixed(1) + 'px\n' +
-      'hits   ' + prof.totalHits + '\n' +
-      'retry  ' + (median(prof.retryGaps) || 0).toFixed(0) + 'ms\n' +
-      'unl    ' + (Object.keys(prof.unlocked).filter(k => prof.unlocked[k]).join(',') || '-');
+      'left   ' + hitsLeft + '\n' +
+      'fails  ' + failsOnStage;
   }
 }
 
@@ -565,19 +858,25 @@ function frame(t){
 }
 
 /* ---------- input ---------- */
-elGo.addEventListener('click', launch);
-addEventListener('touchend', launch, { passive: false });
+el('go').addEventListener('click', launch);
+el('resume').addEventListener('click', launch);
+addEventListener('touchend', e => { if(!launched) launch(e); }, { passive: false });
+
 addEventListener('pointerdown', e => {
   if(!launched) return;
+  if(e.target.closest('button, #daily, #resume')) return;
   e.preventDefault();
-  tap();
+  if(state === 'play' || state === 'dead') tap();
 }, { passive: false });
+
 addEventListener('keydown', e => {
   if(e.code === 'Space' || e.code === 'Enter'){
     e.preventDefault();
-    launched ? tap() : launch();
+    if(!launched) launch();
+    else if(state === 'play' || state === 'dead') tap();
   }
 });
+
 addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('fullscreenchange', () => setTimeout(fit, 120));
 addEventListener('webkitfullscreenchange', () => setTimeout(fit, 120));
@@ -587,6 +886,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 fit();
+showStart();
 requestAnimationFrame(frame);
 </script>
 </body>
